@@ -1,9 +1,13 @@
 from .tools import terminal_clear
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from .database.db_initializer import DatabaseInitializer
 
+
 class Validator:
+
+    def __init__(self):
+        self.database = DatabaseInitializer("tennis_scheduler.sqlite")
 
     def invalid_name(self):
         name = None
@@ -59,7 +63,7 @@ class Validator:
         print("How long would you like to book court?")
         print("1) 30 Minutes")
         print("2) 60 Minutes")
-        if date.hour< 17:
+        if date.hour < 17:
             print("3) 90 Minutes")
 
         try:
@@ -79,7 +83,7 @@ class Validator:
     @staticmethod
     def invalid_booking_format(booking_time, date):
         book_hours = {1: 30, 2: 60, 3: 90}
-        if date.hour < 17 and booking_time == 3:
+        if date.hour >= 17 and booking_time == 3:
             terminal_clear()
             print("You can't book court for 90 minutes after 17:00")
             input("Press enter to continue...")
@@ -95,5 +99,43 @@ class Validator:
             return
         return book_hours[booking_time]
 
-    def check_availability(self, database, date):
-        return database.check_availability(date)
+    def check_reservation_conditions(self, name, date):
+        if not self.check_time_range(date):
+            return
+        if not self.check_if_not_in_past(date):
+            return
+        if not self.check_too_many_reservations(name, date):
+            return
+        if not self.check_availability(date):
+            return
+        return True
+
+    def check_too_many_reservations(self, name, date):
+        if not self.database.check_too_many_reservations(name, date):
+            print("You can't make more than 2 reservations in a week.")
+            input("Press Enter to continue...")
+            return
+        return True
+
+    @staticmethod
+    def check_time_range(date):
+        if date.hour < 8 or date.hour > 18:
+            print("You can't make a reservation before 8:00 and after 18:00.")
+            input("Press Enter to continue...")
+            return
+        return True
+
+    def check_availability(self, date):
+        if not self.database.check_availability(date):
+            print("Court is already booked. Please choose another date.")
+            input("Press Enter to continue...")
+            return
+        return True
+
+    @staticmethod
+    def check_if_not_in_past(date):
+        if datetime.now() + timedelta(hours=1) > date:
+            print("You need to make a reservation at least one hour from now.")
+            input("Press Enter to continue...")
+            return
+        return True
