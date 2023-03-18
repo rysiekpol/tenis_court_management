@@ -1,5 +1,6 @@
 import sqlite3
 from sqlite3 import Error
+from datetime import datetime
 
 
 class DatabaseInitializer(object):
@@ -33,7 +34,7 @@ class DatabaseInitializer(object):
                 conn.commit()
                 conn.close()
 
-    def check_availability(self, date):
+    def check_availability(self, date_start, date_end):
         conn = None
         try:
             conn = sqlite3.connect(self.db_file)
@@ -42,7 +43,8 @@ class DatabaseInitializer(object):
         finally:
             if conn:
                 cur = conn.cursor()
-                cur.execute("SELECT * FROM clients WHERE ? <= end_time AND date(?) == date(end_time)", (date,date,))
+                # dates overlap when => (StartA < EndB) and (EndA > StartB)
+                cur.execute("SELECT * FROM clients WHERE ? < end_time AND ? > start_time", (date_start ,date_end,))
                 rows = cur.fetchall()
                 conn.close()
                 if len(rows) > 0:
@@ -60,6 +62,7 @@ class DatabaseInitializer(object):
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM clients")
                 rows = cur.fetchall()
+                print(rows)
                 conn.close()
                 return rows
 
@@ -72,9 +75,11 @@ class DatabaseInitializer(object):
         finally:
             if conn:
                 cur = conn.cursor()
-                cur.execute("SELECT * FROM clients WHERE strftime('%W',?) == strftime('%W',start_time) AND name == ?", (date,name,))
-                rows = cur.fetchall()
+                cur.execute("SELECT end_time FROM clients WHERE name == ?", (name,))
+                rows = [row for row in cur.fetchall() if
+                        datetime.strptime(row[0],"%Y-%m-%d %H:%M:%S").isocalendar()[1]== date.isocalendar()[1]]
                 conn.close()
+                print(rows)
                 if len(rows) > 2:
                     return False
                 return True

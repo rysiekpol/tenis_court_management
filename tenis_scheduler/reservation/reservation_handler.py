@@ -1,10 +1,12 @@
 from .reservation_validator import Validator
 from datetime import timedelta
 
+MAIN_DB = "tenis_scheduler.sqlite"
+
 
 class ReservationHandler(Validator):
     def __init__(self):
-        super().__init__()
+        super().__init__(MAIN_DB)
 
     def execute_option(self, option):
         if option == 1:
@@ -19,25 +21,31 @@ class ReservationHandler(Validator):
             exit()
         else:
             self.invalid_option(option)
+            input("Press enter to continue...")
 
     def reserve(self):
         name = self.invalid_name()
         if name is None:
+            input("Press enter to continue...")
             return
 
         date = self.invalid_date()
         if date is None:
-            return
-
-        if self.check_reservation_conditions(name, date) is None:
+            input("Press enter to continue...")
             return
 
         book = self.invalid_booking(date)
         if book is None:
-            print("This date is not available")
+            input("Press enter to continue...")
             return
 
-        super().insert(name, date, date + timedelta(minutes=book))
+        if self.check_reservation_conditions(name, date, date+timedelta(minutes=book)) is None:
+            input("Press enter to continue...")
+            return
+
+
+
+        self.database.insert(name, date, date + timedelta(minutes=book))
         print("Reservation successful!")
         input("Press Enter to continue...")
 
