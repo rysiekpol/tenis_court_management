@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="dataSourceStorageLocal" created-in="PY-223.8617.48">
-    <data-source name="test_db" uuid="3390d99c-ab19-4fc2-b2a2-d086d9e3e087">
+  <component name="dataSourceStorageLocal" created-in="PY-223.8836.43">
+    <data-source name="tenis_scheduler" uuid="5a1fecc5-8e91-4f59-8785-7bfa155c7c47">
       <database-info product="SQLite" version="3.40.1" jdbc-version="4.2" driver-name="SQLite JDBC" driver-version="3.40.1.0" dbms="SQLITE" exact-version="3.40.1" exact-driver-version="3.40">
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>

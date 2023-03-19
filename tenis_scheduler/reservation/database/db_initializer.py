@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Error
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class DatabaseInitializer(object):
@@ -62,7 +62,6 @@ class DatabaseInitializer(object):
                 cur = conn.cursor()
                 cur.execute("SELECT * FROM clients")
                 rows = cur.fetchall()
-                print(rows)
                 conn.close()
                 return rows
 
@@ -79,7 +78,25 @@ class DatabaseInitializer(object):
                 rows = [row for row in cur.fetchall() if
                         datetime.strptime(row[0],"%Y-%m-%d %H:%M:%S").isocalendar()[1]== date.isocalendar()[1]]
                 conn.close()
-                print(rows)
                 if len(rows) > 2:
                     return False
                 return True
+
+    def get_reserved_times(self, start_date):
+        conn = None
+        try:
+            conn = sqlite3.connect(self.db_file)
+        except Error as e:
+            print(e)
+        finally:
+            if conn:
+                cur = conn.cursor()
+                cur.execute("SELECT start_time, end_time FROM clients WHERE date(end_time) == date(?)", (start_date,))
+
+                rows = [((datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')), (datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')))
+                        for start_date, end_date in cur.fetchall()
+                        if datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S') >= datetime.now() + timedelta(hours=1)]
+
+                conn.close()
+                return rows
+            return
