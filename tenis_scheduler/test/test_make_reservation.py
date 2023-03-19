@@ -6,6 +6,7 @@ import sqlite3, os
 
 TEST_DB = "test_db.sqlite"
 
+
 class TestValidator(unittest.TestCase):
 
     def setUp(self) -> None:
@@ -25,12 +26,11 @@ class TestValidator(unittest.TestCase):
             c.execute("INSERT INTO clients VALUES (?, ?, ?)",
                       ("Szymon Szymański", datetime(2050, 1, 1, 15, 0), datetime(2050, 1, 1, 16, 30)))
             c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Błażej Błażejowski", datetime(2050, 1, 2, 17, 0), datetime(2050, 1, 2, 18, 0)))
+                      ("Błażej Błażejowski", datetime(2050, 1, 2, 16, 0), datetime(2050, 1, 2, 17, 0)))
             conn.commit()
         conn.close()
 
         self.validator = Validator(TEST_DB)
-
 
     @patch('tenis_scheduler.reservation.reservation_validator.Validator.invalid_name',
            return_value='Marek Kowalski')
@@ -103,14 +103,25 @@ class TestValidator(unittest.TestCase):
         self.assertTrue(self.validator.check_if_not_in_past(datetime.now() + timedelta(minutes=60, seconds=1)))
 
     def test_check_availability(self):
-        self.assertTrue(self.validator.check_availability(datetime(2050, 1, 2, 14, 0),datetime(2050, 1, 2, 15, 30)))
-        self.assertIsNone(self.validator.check_availability(datetime(2050, 1, 1, 13, 30),datetime(2050, 1, 1, 14, 0)))
-        self.assertTrue(self.validator.check_availability(datetime(2050, 1, 1, 14, 0),datetime(2050, 1, 1, 15, 0)))
+        self.assertTrue(self.validator.check_availability(datetime(2050, 1, 2, 14, 0), datetime(2050, 1, 2, 15, 30)))
+        self.assertIsNone(self.validator.check_availability(datetime(2050, 1, 1, 13, 30), datetime(2050, 1, 1, 14, 0)))
+        self.assertTrue(self.validator.check_availability(datetime(2050, 1, 1, 14, 0), datetime(2050, 1, 1, 15, 0)))
 
-    @patch('tenis_scheduler.reservation.reservation_validator.Validator.check_closest_reservation', return_value='yes')
-    def test_propose_closest_reservation(self, mock_input):
-        self.assertTrue(self.validator.check_closest_reservation(datetime(2050, 1, 1, 12, 0), 60))
+    def test_check_closest_reservation(self):
+        self.assertEqual(self.validator.check_closest_reservation
+                         (datetime(2050, 1, 1, 12, 0), 60), datetime(2050, 1, 1, 14, 0))
+        self.assertEqual(self.validator.check_closest_reservation
+                         (datetime(2050, 1, 1, 12, 0), 90), datetime(2050, 1, 1, 16, 30))
+        self.assertEqual(self.validator.check_closest_reservation
+                         (datetime(2049, 12, 30, 16, 0), 30), datetime(2049, 12, 30, 16, 30))
+        self.assertIsNone(self.validator.check_closest_reservation(datetime(2050, 1, 2, 18, 0), 60))
+        self.assertEqual(self.validator.check_closest_reservation(datetime(2050, 1, 2, 16, 30), 60),datetime(2050, 1, 2, 17, 0))
+
+    def test_get_base_available_times(self):
+        self.assertIsNotNone(self.validator.get_base_available_times(datetime(2050, 1, 1, 16, 0)))
+        self.assertIsNotNone(self.validator.get_base_available_times(datetime(2050, 1, 2, 11, 0)))
+        self.assertListEqual(self.validator.get_base_available_times(datetime(2050, 1, 1, 19, 0)), [])
 
     @classmethod
-    def tearDownClass(self):
+    def tearDownClass(cls):
         os.remove(TEST_DB)

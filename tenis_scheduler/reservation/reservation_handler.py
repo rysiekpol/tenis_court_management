@@ -45,19 +45,37 @@ class ReservationHandler(Validator):
                 input("Press enter to continue...")
                 return
 
-            if self.check_availability(date, date + timedelta(minutes=book)) is None:
-                choice = self.check_closest_reservation(date, book)
-                if choice is None:
-                    input("Press enter to continue...")
-                    return
-                elif choice:
-                    break
-                else:
-                    continue
+            if self.check_availability(date, date + timedelta(minutes=book)) is not None:
+                break
+
+            # if date is not available, check for closest available time
+            closest_time = self.check_closest_reservation(date, book)
+            if closest_time is None:
+                input("Press enter to continue...")
+                return
+
+            choice = self.get_final_choice(closest_time)
+            if choice is None:
+                return
+            elif choice:
+                break
+            else:
+                continue
 
         self.database.insert(name, date, date + timedelta(minutes=book))
         print("Reservation successful!")
         input("Press Enter to continue...")
+        return
+
+    def get_final_choice(self, closest_time):
+        print(f"The time you chose is unavailable, "
+              f"would you like to make a reservation for {str(closest_time.time())[:-3]} instead? (yes/no)")
+        choice = input()
+        if choice.lower() in ["y", "yes"]:
+            return True
+        elif choice.lower() in ["n", "no"]:
+            return False
+        print("Invalid choice. Please choose yes or no.")
         return
 
     def cancel(self):

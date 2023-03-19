@@ -158,10 +158,10 @@ class Validator:
             print("Court is already booked and cannot be booked for another hour. Please choose another date.")
             return
 
-        return self.get_final_choice(final_times, date_start)
+        return min(final_times, key=lambda x: abs(x - date_start))
 
-
-    def get_base_available_times(self, date_start):
+    @staticmethod
+    def get_base_available_times(date_start):
         available_times = []
         start_time = date_start.replace(hour=date_start.hour, minute=0, second=0, microsecond=0)
         end_time = date_start.replace(hour=18, minute=30, second=0, microsecond=0)
@@ -171,7 +171,8 @@ class Validator:
             start_time += timedelta(minutes=30)
         return available_times
 
-    def get_real_available_times(self, available_times, closest_reservations):
+    @staticmethod
+    def get_real_available_times(available_times, closest_reservations):
         available_times_copy = available_times.copy()
         for start_time, end_time in closest_reservations:
             for j in range(len(available_times)):
@@ -180,23 +181,11 @@ class Validator:
                         available_times_copy.remove(available_times[j])
         return available_times_copy
 
-    def get_final_times(self, available_times, book_time):
+    @staticmethod
+    def get_final_times(available_times, book_time):
         final_times = []
         # book_time//30 means which index of booking time user chose
         for i in range(len(available_times) - book_time // 30 + 1):
             if available_times[i][0] + timedelta(minutes=book_time) == available_times[i + book_time // 30 - 1][1]:
                 final_times.append(available_times[i][0])
         return final_times
-
-    def get_final_choice(self, final_times, date_start):
-        closest_time = min(final_times, key=lambda x: abs(x - date_start))
-
-        print(f"The time you chose is unavailable, "
-              f"would you like to make a reservation for {str(closest_time.time())[:-3]} instead? (yes/no)")
-        choice = input()
-        if choice.lower() in ["y", "yes"]:
-            return True
-        elif choice.lower() in ["n", "no"]:
-            return False
-        print("Invalid choice. Please choose yes or no.")
-        return
