@@ -240,7 +240,7 @@ class Validator:
         if date_end - date_start > timedelta(days=7):
             print("You can check only 7 days in a row.")
             return
-        if date_start > datetime(2100, 12, 31):
+        if date_end > datetime(2100, 12, 31):
             print("Your date needs to be and at most to 31.12.2100 in the future.")
             return
         return True

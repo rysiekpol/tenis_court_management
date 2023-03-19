@@ -132,6 +132,16 @@ class TestValidator(unittest.TestCase):
         self.assertIsNone(self.validator._check_if_can_cancel
                           ("Szymon Szymański", datetime(2050, 1, 1, 15, 30)))
 
+    def test_check_data_range(self):
+        self.assertTrue(self.validator._check_data_range(datetime(2050, 1, 1), datetime(2050, 1, 8)))
+        self.assertTrue(self.validator._check_data_range(datetime(2100, 12, 25), datetime(2100, 12, 31)))
+        self.assertIsNone(self.validator._check_data_range(datetime(2050, 1, 1), datetime(2050, 1, 9)))
+        self.assertIsNone(self.validator._check_data_range(datetime(2050, 1, 20), datetime(2050, 1, 19)))
+        self.assertIsNone(self.validator._check_data_range(datetime(2101, 1, 1), datetime(2101, 1, 5)))
+        self.assertIsNone(self.validator._check_data_range
+                          (datetime.now()-timedelta(days=1), datetime.now()+timedelta(days=2)))
+        self.assertTrue(self.validator._check_data_range(datetime.now(), datetime.now() + timedelta(days=2)))
+
     @classmethod
     def tearDownClass(cls):
         os.remove(TEST_DB)
