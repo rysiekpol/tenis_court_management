@@ -17,13 +17,15 @@ def main():
             else:
                 # choice was successfully parsed
                 break
+
         reservation_handler.execute_option(choice)
+        input("Press enter to continue...")
 
 
 def ask_user():
     tools.terminal_clear()
 
-    print("What do you want to do?")
+    print("What do you want to do? {1, 2, 3, 4, 5}")
     print("1. Make a reservation")
     print("2. Cancel a reservation")
     print("3. Print schedule")
