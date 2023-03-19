@@ -3,16 +3,17 @@ import re
 from datetime import datetime, timedelta
 from .database.db_initializer import DatabaseInitializer
 
+OPTIONS = {"reservation": "When would you like to book?", "cancellation": "What date would you like to cancel?"}
 
 class Validator:
 
     def __init__(self, database_name):
-        self.database = DatabaseInitializer(database_name)
+        self.__database = DatabaseInitializer(database_name)
 
     def invalid_name(self):
         name = None
         try:
-            name = input("What's you Name? {Name Surname} e.g. John Smith\n")
+            name = input("What's your Name? {Name Surname} e.g. John Smith\n")
         except ValueError:
             terminal_clear()
             print(f"Invalid name -> {name}. Please provide a valid name.")
@@ -36,24 +37,27 @@ class Validator:
     def invalid_option(option):
         terminal_clear()
         print(f"Invalid option -> {option}. Please provide a valid option.")
+        return
 
-    def invalid_date(self):
+    def invalid_date(self, type_of_usage):
         date = None
         try:
-            date = input("When would you like to book? {DD.MM.YYYY HH:MM} e.g. 10.07.2023 15:30\n"
+            # type of usage means which function called, 0 -> reservation, 1 -> cancel
+            date = input(f"{OPTIONS[type_of_usage]} {{DD.MM.YYYY HH:MM}} e.g. 10.07.2023 15:30\n"
                          "Minutes must be :00 or :30.\n")
         except ValueError:
             terminal_clear()
-            print(f"Invalid date -> {date}. Please provide a valid date -> DD.MM.YYYY HH:MM")
+            print(f"Invalid date -> {date}. Please provide a valid date {{DD.MM.YYYY HH:MM}}")
             return
         return self.invalid_date_format(date)
 
     def invalid_date_format(self, date):
         try:
+            # date must be in format DD.MM.YYYY HH:MM
             datetime.strptime(date, "%d.%m.%Y %H:%M")
         except ValueError:
             terminal_clear()
-            print(f"Invalid date -> {date}. Please provide a valid date -> DD.MM.YYYY HH:MM")
+            print(f"Invalid date -> {date}. Please provide a valid date {{DD.MM.YYYY HH:MM}}")
             return
         return self.invalid_minutes(datetime.strptime(date, "%d.%m.%Y %H:%M"))
 
@@ -113,7 +117,7 @@ class Validator:
         return True
 
     def check_too_many_reservations(self, name, date):
-        if not self.database.check_too_many_reservations(name, date):
+        if not self.__database.check_too_many_reservations(name, date):
             print("You can't make more than 2 reservations in a week.")
             return
         return True
@@ -121,12 +125,12 @@ class Validator:
     @staticmethod
     def check_time_range(date):
         if date.hour < 8 or date.hour > 18 or (date.hour == 18 and date.minute != 0):
-            print("You can't make a reservation before 8:00 and after 18:00.")
+            print("Your time must be before 8:00 and after 18:00. Please provide a valid time.")
             return
         return True
 
     def check_availability(self, date_start, date_end):
-        if not self.database.check_availability(date_start, date_end):
+        if not self.__database.check_availability(date_start, date_end):
             # print("Court is already booked. Please choose another date.")
             return
         return True
@@ -134,12 +138,12 @@ class Validator:
     @staticmethod
     def check_if_not_in_past(date):
         if datetime.now() + timedelta(hours=1) > date or date > datetime(2100, 12, 31):
-            print("You need to make a reservation at least one hour from now, and at most to 31.12.2100 in the future.")
+            print("Your date needs to be at least one hour from now, and at most to 31.12.2100 in the future.")
             return
         return True
 
     def check_closest_reservation(self, date_start, book_time):
-        closest_reservations = self.database.get_reserved_times(date_start)
+        closest_reservations = self.__database.get_reserved_times(date_start)
         if closest_reservations is None:
             return
 
@@ -189,3 +193,20 @@ class Validator:
             if available_times[i][0] + timedelta(minutes=book_time) == available_times[i + book_time // 30 - 1][1]:
                 final_times.append(available_times[i][0])
         return final_times
+
+    def check_if_can_cancel(self, name, date_start):
+        user_date = self.__database.get_user_reserved_times(date_start, name)
+        if not user_date:
+            print("You can't cancel reservation, because there is no reservation on specified date.")
+            return
+        return user_date
+
+    def check_cancellation_conditions(self, name, date_start):
+        if not self.check_time_range(date_start):
+            return
+        if not self.check_if_not_in_past(date_start):
+            return
+        if not self.check_too_many_reservations(name, date_start):
+            return
+
+        return self.check_if_can_cancel(name, date_start)

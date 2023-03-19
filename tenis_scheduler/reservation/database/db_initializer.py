@@ -5,14 +5,14 @@ from datetime import datetime, timedelta
 
 class DatabaseInitializer(object):
     def __init__(self, db):
-        self.db_file = db
-        self.initialize()
+        self.__db_file = db
+        self.__initialize()
 
-    def initialize(self):
+    def __initialize(self):
         """ create a database connection to a SQLite database """
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -24,7 +24,7 @@ class DatabaseInitializer(object):
     def insert(self, name, start_time, end_time):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -37,7 +37,7 @@ class DatabaseInitializer(object):
     def check_availability(self, date_start, date_end):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -54,7 +54,7 @@ class DatabaseInitializer(object):
     def get_reservations(self):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -68,7 +68,7 @@ class DatabaseInitializer(object):
     def check_too_many_reservations(self, name, date):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -85,7 +85,7 @@ class DatabaseInitializer(object):
     def get_reserved_times(self, start_date):
         conn = None
         try:
-            conn = sqlite3.connect(self.db_file)
+            conn = sqlite3.connect(self.__db_file)
         except Error as e:
             print(e)
         finally:
@@ -97,6 +97,23 @@ class DatabaseInitializer(object):
                         for start_date, end_date in cur.fetchall()
                         if datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S') >= datetime.now() + timedelta(hours=1)]
 
+                conn.close()
+                return rows
+            return
+
+    def get_user_reserved_times(self, date, name):
+        conn = None
+        try:
+            conn = sqlite3.connect(self.__db_file)
+        except Error as e:
+            print(e)
+        finally:
+            if conn:
+                cur = conn.cursor()
+                cur.execute("SELECT start_time, end_time FROM clients WHERE start_time == ? AND name = ?", (date, name))
+
+                rows = [((datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')), (datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')))
+                        for start_date, end_date in cur.fetchall()]
                 conn.close()
                 return rows
             return

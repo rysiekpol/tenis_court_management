@@ -17,7 +17,9 @@ def main():
             else:
                 # choice was successfully parsed
                 break
+
         reservation_handler.execute_option(choice)
+        input("Press enter to continue...")
 
 
 def ask_user():
