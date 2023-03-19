@@ -122,6 +122,13 @@ class TestValidator(unittest.TestCase):
         self.assertIsNotNone(self.validator.get_base_available_times(datetime(2050, 1, 2, 11, 0)))
         self.assertListEqual(self.validator.get_base_available_times(datetime(2050, 1, 1, 19, 0)), [])
 
+    def test_check_if_can_cancel(self):
+        self.assertEqual(self.validator.check_if_can_cancel
+                        ("Adam Kowalski", datetime(2050, 1, 1, 12, 0)), datetime(2050, 1, 1, 12, 0))
+        self.assertEqual(self.validator.check_if_can_cancel("Błażej Błażejowski", datetime(2050, 1, 2, 16, 0)), datetime(2050, 1, 2, 16, 0))
+        self.assertIsNone(self.validator.check_if_can_cancel("Marcin Marcinowski", datetime(2050, 1, 1, 12, 0)))
+        self.assertIsNone(self.validator.check_if_can_cancel("Szymon Szymański", datetime(2050, 1, 1, 15, 30)))
+
     @classmethod
     def tearDownClass(cls):
         os.remove(TEST_DB)

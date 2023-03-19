@@ -101,7 +101,7 @@ class DatabaseInitializer(object):
                 return rows
             return
 
-    def get_user_reserved_times(self, date, name):
+    def get_user_reserved_times(self, name, date):
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -110,10 +110,10 @@ class DatabaseInitializer(object):
         finally:
             if conn:
                 cur = conn.cursor()
-                cur.execute("SELECT start_time, end_time FROM clients WHERE start_time == ? AND name = ?", (date, name))
-
-                rows = [((datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')), (datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')))
-                        for start_date, end_date in cur.fetchall()]
+                cur.execute("SELECT start_time FROM clients WHERE start_time == ? AND name = ?", (date, name))
+                reserved_date = cur.fetchall()
+                if len(reserved_date) > 0:
+                    reserved_date = datetime.strptime(reserved_date[0][0], '%Y-%m-%d %H:%M:%S')
                 conn.close()
-                return rows
+                return reserved_date
             return

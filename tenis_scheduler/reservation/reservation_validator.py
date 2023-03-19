@@ -195,7 +195,7 @@ class Validator:
         return final_times
 
     def check_if_can_cancel(self, name, date_start):
-        user_date = self.__database.get_user_reserved_times(date_start, name)
+        user_date = self.__database.get_user_reserved_times(name, date_start)
         if not user_date:
             print("You can't cancel reservation, because there is no reservation on specified date.")
             return
