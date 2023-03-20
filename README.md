@@ -17,10 +17,10 @@ To start a script, type in the terminal:
 
 ```bash
 cd Downloads/internship_task # most probably
-python tenis_scheduler
+python tennis_scheduler
 
 # depending on your os distribution you may need to type in
-python3 tenis_scheduler 
+python3 tennis_scheduler 
 ```
 
 To run unit tests, type in:
