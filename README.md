@@ -1,5 +1,7 @@
 
-# Tenis Scheduler
+# Tenis Scheduler 
+
+@@ author -> Maciej Szefler - ma.szefler@gmail.com
 
 This script was made for the backend internship task at Profil Software for managing the tennis court. You can make reservations, delete, print, and save them to a file.
 
