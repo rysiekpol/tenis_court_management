@@ -2,7 +2,8 @@ from .reservation_validator import Validator
 from datetime import timedelta, datetime
 import csv, json
 
-MAIN_DB = "tenis_scheduler.sqlite"
+MAIN_DB = "tennis_scheduler.sqlite"
+
 
 class ReservationHandler(Validator):
     def __init__(self):
@@ -114,7 +115,7 @@ class ReservationHandler(Validator):
 
     @staticmethod
     def __print_schedule(start_date, end_date, reservations):
-        days = (end_date - start_date).days
+        days = (end_date - start_date).days + 1
 
         reservation_number = 0
         # print reservations for each day
@@ -179,7 +180,7 @@ class ReservationHandler(Validator):
 
     @staticmethod
     def __save_to_csv(filename, reservations):
-        with open(filename+".csv", "w", newline="") as file:
+        with open(filename + ".csv", "w", newline="",encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(["name", "start_time", "end_time"])
             for reservation in reservations:
@@ -187,7 +188,7 @@ class ReservationHandler(Validator):
 
     @staticmethod
     def __save_to_json(filename, reservations, start_date, end_date):
-        days = (end_date - start_date).days
+        days = (end_date - start_date).days + 1
         json_dict = {}
         reservation_number = 0
         for i in range(days):
@@ -212,7 +213,7 @@ class ReservationHandler(Validator):
             if reservation_number_copy == reservation_number:
                 json_dict[(start_date + timedelta(days=i)).strftime("%d.%m")] = []
 
-        with open(filename+".json", "w") as file:
+        with open(filename + ".json", "w") as file:
             json.dump(json_dict, file, indent=2)
 
     @staticmethod
@@ -232,8 +233,5 @@ class ReservationHandler(Validator):
                                     "start_time": start_time,
                                     "end_time": end_time}]
 
-        with open(filename+".json", "w") as file:
+        with open(filename + ".json", "w") as file:
             json.dump(json_dict, file, indent=2)
-
-
-
