@@ -171,8 +171,10 @@ class ReservationHandler(Validator):
                 return
             if choice:
                 self.__save_to_json(filename, reservations, start_date, end_date)
-            else:
+            elif not choice:
                 self.__save_to_json_no_empty(filename, reservations)
+            else:
+                return
         print("Reservations saved!")
 
     @staticmethod

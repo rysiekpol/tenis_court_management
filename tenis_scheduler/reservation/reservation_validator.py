@@ -148,7 +148,6 @@ class Validator:
 
     def _check_availability(self, date_start, date_end):
         if not self._database.check_availability(date_start, date_end):
-            # print("Court is already booked. Please choose another date.")
             return
         return True
 
@@ -278,7 +277,7 @@ class Validator:
     @staticmethod
     def _invalid_filename_format(filename):
         # filename can contain only letters, numbers, underscores and dashes
-        if re.match(r"^[a-zA-Z0-9_.-]*$", filename) is None:
+        if re.match(r"^[a-zA-Z0-9_.-]+$", filename) is None:
             terminal_clear()
             print(f"Invalid filename -> {filename}. Please provide a valid filename.")
             return
@@ -298,6 +297,9 @@ class Validator:
     def _invalid_choice_json_format(choice: str):
         if choice.lower() in ["yes", "y"]:
             return True
-        return False
-
+        elif choice.lower() in ["no", "n"]:
+            return
+        terminal_clear()
+        print(f"Invalid option -> {choice}. Please provide a valid option {{yes/no}}.")
+        return
 

@@ -142,6 +142,26 @@ class TestValidator(unittest.TestCase):
                           (datetime.now()-timedelta(days=1), datetime.now()+timedelta(days=2)))
         self.assertTrue(self.validator._check_data_range(datetime.now(), datetime.now() + timedelta(days=2)))
 
+    def test_invalid_extension_format(self):
+        self.assertIsNone(self.validator._invalid_extension_format("txt"))
+        self.assertIsNone(self.validator._invalid_extension_format("docx"))
+        self.assertTrue(self.validator._invalid_extension_format("csv"))
+        self.assertTrue(self.validator._invalid_extension_format("json"))
+
+    def test_invalid_filename_format(self):
+        self.assertIsNone(self.validator._invalid_filename_format("błąd"))
+        self.assertIsNone(self.validator._invalid_filename_format(""))
+        self.assertIsNone(self.validator._invalid_filename_format("file%file"))
+        self.assertTrue(self.validator._invalid_filename_format("01.01-08.01"))
+
+    def test_invalid_choice_json_format(self):
+        self.assertFalse(self.validator._invalid_choice_json_format("NO"))
+        self.assertFalse(self.validator._invalid_choice_json_format("n"))
+        self.assertTrue(self.validator._invalid_choice_json_format("y"))
+        self.assertTrue(self.validator._invalid_choice_json_format("yEs"))
+        self.assertIsNone(self.validator._invalid_choice_json_format(""))
+        self.assertIsNone(self.validator._invalid_choice_json_format("nOpE"))
+
     @classmethod
     def tearDownClass(cls):
         os.remove(TEST_DB)
