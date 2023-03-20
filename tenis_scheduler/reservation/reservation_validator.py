@@ -229,18 +229,75 @@ class Validator:
         return self._check_if_can_cancel(name, date_start)
 
     @staticmethod
-    def _check_data_range(date_start, date_end):
+    def _check_data_range(date_start, date_end, operation="printing"):
         # date is provided in format -> DD.MM.YYYY
+        if operation == "printing":
+            if date_start.date() < datetime.now().date():
+                print("Start date must be today or after.")
+                return
+            if date_end - date_start > timedelta(days=7):
+                print("You can check only 7 days in a row.")
+                return
+
         if date_start > date_end:
             print("Start date must be before end date.")
-            return
-        if date_start.date() < datetime.now().date():
-            print("Start date must be today or after.")
-            return
-        if date_end - date_start > timedelta(days=7):
-            print("You can check only 7 days in a row.")
             return
         if date_end > datetime(2100, 12, 31):
             print("Your date needs to be and at most to 31.12.2100 in the future.")
             return
         return True
+
+    def _invalid_extension(self):
+        extension = None
+        try:
+            extension = input("What extension would you like the file to be saved in? {csv/json}\n")
+        except ValueError:
+            terminal_clear()
+            print(f"Invalid extension -> {extension}. Please provide a valid extension -> {{csv/json}}.")
+            return
+        return self._invalid_extension_format(extension)
+
+    @staticmethod
+    def _invalid_extension_format(extension):
+        if extension.lower() not in ["csv", "json"]:
+            terminal_clear()
+            print(f"Invalid extension -> {extension}. Please provide a valid extension -> {{csv/json}}.")
+            return
+        return extension.lower()
+
+    def _invalid_filename(self):
+        filename = None
+        try:
+            filename = input("What would you like the file to be named?\n")
+        except ValueError:
+            terminal_clear()
+            print(f"Invalid filename -> {filename}. Please provide a valid filename.")
+            return
+        return self._invalid_filename_format(filename)
+
+    @staticmethod
+    def _invalid_filename_format(filename):
+        # filename can contain only letters, numbers, underscores and dashes
+        if re.match(r"^[a-zA-Z0-9_.-]*$", filename) is None:
+            terminal_clear()
+            print(f"Invalid filename -> {filename}. Please provide a valid filename.")
+            return
+        return filename
+
+    def _invalid_choice_json(self):
+        choice = None
+        try:
+            choice = input("Do you want empty dates in your file? {yes/no}\n")
+        except ValueError:
+            terminal_clear()
+            print(f"Invalid option -> {choice}. Please provide a valid option {{yes/no}}.")
+            return
+        return self._invalid_choice_json_format(choice)
+
+    @staticmethod
+    def _invalid_choice_json_format(choice: str):
+        if choice.lower() in ["yes", "y"]:
+            return True
+        return False
+
+
