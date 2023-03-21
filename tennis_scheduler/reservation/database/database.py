@@ -3,7 +3,7 @@ from sqlite3 import Error
 from datetime import datetime, timedelta
 
 
-class DatabaseInitializer(object):
+class Database(object):
     def __init__(self, db):
         self.__db_file = db
         self.__initialize()
@@ -22,7 +22,7 @@ class DatabaseInitializer(object):
                 c.execute('''CREATE TABLE IF NOT EXISTS clients (name TEXT, start_time DATE, end_time DATE)''')
                 conn.close()
 
-    def insert(self, name, start_time, end_time):
+    def insert(self, name: str, start_time: datetime, end_time: datetime) -> None:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -35,7 +35,7 @@ class DatabaseInitializer(object):
                 conn.commit()
                 conn.close()
 
-    def delete(self, name, date):
+    def delete(self, name: str, date: datetime) -> None:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -48,7 +48,7 @@ class DatabaseInitializer(object):
                 conn.commit()
                 conn.close()
 
-    def check_availability(self, date_start, date_end):
+    def check_availability(self, date_start: datetime, date_end: datetime) -> bool:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -61,11 +61,9 @@ class DatabaseInitializer(object):
                 cur.execute("SELECT * FROM clients WHERE ? < end_time AND ? > start_time", (date_start, date_end,))
                 rows = cur.fetchall()
                 conn.close()
-                if len(rows) > 0:
-                    return False
-                return True
+                return len(rows) <= 0
 
-    def get_reservations(self, start_date, end_date):
+    def get_reservations(self, start_date: datetime, end_date: datetime) -> list:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -82,7 +80,7 @@ class DatabaseInitializer(object):
                 conn.close()
                 return rows
 
-    def check_too_many_reservations(self, name, date):
+    def check_too_many_reservations(self, name: str, date: datetime) -> bool:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -95,11 +93,9 @@ class DatabaseInitializer(object):
                 rows = [row for row in cur.fetchall() if
                         datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S").isocalendar()[1] == date.isocalendar()[1]]
                 conn.close()
-                if len(rows) > 2:
-                    return False
-                return True
+                return len(rows) <= 2
 
-    def get_reserved_times(self, start_date):
+    def get_reserved_times(self, start_date: datetime) -> list:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -117,9 +113,8 @@ class DatabaseInitializer(object):
 
                 conn.close()
                 return rows
-            return
 
-    def get_user_reserved_times(self, name, date):
+    def get_user_reserved_times(self, name: str, date: datetime) -> datetime:
         conn = None
         try:
             conn = sqlite3.connect(self.__db_file)
@@ -134,6 +129,5 @@ class DatabaseInitializer(object):
                     reserved_date = datetime.strptime(reserved_date[0][0], '%Y-%m-%d %H:%M:%S')
                 conn.close()
                 return reserved_date
-            return
 
 

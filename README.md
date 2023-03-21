@@ -36,16 +36,16 @@ $ pip install sqlalchemy
 
 Then in ```internship_task/reservation/reservation_validator.py```  comment the line 
 ```py
-self._database = DatabaseInitializer(database_name)
+self._database = Database(database_name)
 # and uncomment the line
-self._database = DatabaseInitializerORM(database_name)
+self._database = DatabaseORM(database_name)
 ```
 
-If you want to use tests while using ORM database, in ```internship_task/test/test_make_reservation.py``` change
-```
-db = DatabaseInitializer(TEST_DB)
+If you want to use tests while using ORM database, in ```internship_task/test/test_reservations.py``` change
+```python
+self.db = Database(TEST_DB)
 # to 
-db = DatabaseInitializerORM(TEST_DB)
+self.db = DatabaseORM(TEST_DB)
 ```
 
 If you don't want to use ORM database, then delete it, and remove lines from above. You will also need to remove importing packages from the files above.

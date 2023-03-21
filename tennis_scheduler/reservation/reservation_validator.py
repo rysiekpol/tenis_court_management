@@ -1,8 +1,8 @@
 from .tools import terminal_clear
 import re
 from datetime import datetime, timedelta
-from .database.db_initializer import DatabaseInitializer
-from .database.db_initializer_orm import DatabaseInitializerORM
+from .database.database import Database
+from .database.database_orm import DatabaseORM
 
 INFORMATION = {"reservation": "When would you like to book?",
                "cancellation": "What date would you like to cancel?",
@@ -17,9 +17,9 @@ DATE_FORMAT = {"reservation": "{DD.MM.YYYY HH:MM} e.g. 10.07.2023 15:30\nMinutes
 
 class Validator:
 
-    def __init__(self, database_name):
-        self._database = DatabaseInitializer(database_name)
-        #self._database = DatabaseInitializerORM(database_name)
+    def __init__(self, database_name: str) -> None:
+        #self._database = Database(database_name)
+        self._database = DatabaseORM(database_name)
 
     def _invalid_name(self):
         name = None
@@ -32,7 +32,7 @@ class Validator:
         return self._invalid_name_regex(name)
 
     @staticmethod
-    def _invalid_name_regex(name):
+    def _invalid_name_regex(name: str):
         # checking if name and surname starts with big letter
         # there is only one whitespace between words
         # rest of the letters must be low
@@ -45,12 +45,12 @@ class Validator:
         return name
 
     @staticmethod
-    def _invalid_option(option):
+    def _invalid_option(option: int) -> None:
         terminal_clear()
         print(f"Invalid option -> {option}. Please provide a valid option.")
         return
 
-    def _invalid_date(self, type_of_usage="reservation"):
+    def _invalid_date(self, type_of_usage: str = "reservation"):
         date = None
         try:
             # type of usage means which function called,
@@ -63,7 +63,7 @@ class Validator:
             return
         return self._invalid_date_format(date, type_of_usage)
 
-    def _invalid_date_format(self, date, type_of_usage="reservation"):
+    def _invalid_date_format(self, date, type_of_usage: str = "reservation"):
         try:
             # date must be in format DD.MM.YYYY HH:MM for reservation and cancellation
             # date must be in format DD.MM.YYYY for printing and saving
@@ -81,14 +81,14 @@ class Validator:
         return datetime.strptime(date, "%d.%m.%Y")
 
     @staticmethod
-    def _invalid_minutes(date):
+    def _invalid_minutes(date: datetime):
         if date.minute not in [0, 30]:
             terminal_clear()
             print("Minutes must be :00 or :30! Please provide a valid minutes.")
             return
         return date
 
-    def _invalid_booking(self, date):
+    def _invalid_booking(self, date: datetime):
         booking = None
         print("For how long would you like to book court?")
         print("1) 30 Minutes")
@@ -110,7 +110,7 @@ class Validator:
         return self._invalid_booking_format(booking, date)
 
     @staticmethod
-    def _invalid_booking_format(booking_time, date):
+    def _invalid_booking_format(booking_time: int, date: datetime):
         book_hours = {1: 30, 2: 60, 3: 90}
         if date.hour >= 17 and booking_time == 3:
             terminal_clear()
@@ -126,7 +126,7 @@ class Validator:
             return
         return book_hours[booking_time]
 
-    def _check_reservation_conditions(self, name, date_start):
+    def _check_reservation_conditions(self, name: str, date_start: datetime):
         if not self._check_time_range(date_start):
             return
         if not self._check_if_not_in_past(date_start):
@@ -135,32 +135,32 @@ class Validator:
             return
         return True
 
-    def _check_too_many_reservations(self, name, date):
+    def _check_too_many_reservations(self, name: str, date: datetime):
         if not self._database.check_too_many_reservations(name, date):
             print("You can't make more than 2 reservations in a week.")
             return
         return True
 
     @staticmethod
-    def _check_time_range(date):
+    def _check_time_range(date: datetime):
         if date.hour < 8 or date.hour > 18 or (date.hour == 18 and date.minute != 0):
             print("Your time must be before 8:00 and after 18:00. Please provide a valid time.")
             return
         return True
 
-    def _check_availability(self, date_start, date_end):
+    def _check_availability(self, date_start: datetime, date_end: datetime):
         if not self._database.check_availability(date_start, date_end):
             return
         return True
 
     @staticmethod
-    def _check_if_not_in_past(date):
+    def _check_if_not_in_past(date: datetime):
         if datetime.now() + timedelta(hours=1) > date or date > datetime(2100, 12, 31):
             print("Your date needs to be at least one hour from now, and at most to 31.12.2100 in the future.")
             return
         return True
 
-    def _check_closest_reservation(self, date_start, book_time):
+    def _check_closest_reservation(self, date_start: datetime, book_time: int):
         closest_reservations = self._database.get_reserved_times(date_start)
         if closest_reservations is None:
             return
@@ -183,7 +183,7 @@ class Validator:
         return min(final_times, key=lambda x: abs(x - date_start))
 
     @staticmethod
-    def _get_base_available_times(date_start):
+    def _get_base_available_times(date_start: datetime) -> list:
         available_times = []
         start_hour = 8
         start_minutes = 0
@@ -206,7 +206,7 @@ class Validator:
         return available_times
 
     @staticmethod
-    def _get_real_available_times(available_times, closest_reservations):
+    def _get_real_available_times(available_times: list, closest_reservations: list) -> list:
         available_times_copy = available_times.copy()
         for start_time, end_time in closest_reservations:
             for j in range(len(available_times)):
@@ -216,7 +216,7 @@ class Validator:
         return available_times_copy
 
     @staticmethod
-    def _get_final_times(available_times, book_time):
+    def _get_final_times(available_times: list, book_time: int) -> list:
         final_times = []
         # book_time//30 means which index of booking time user chose
         for i in range(len(available_times) - book_time // 30 + 1):
@@ -224,14 +224,14 @@ class Validator:
                 final_times.append(available_times[i][0])
         return final_times
 
-    def _check_if_can_cancel(self, name, date_start):
+    def _check_if_can_cancel(self, name: str, date_start: datetime):
         user_date = self._database.get_user_reserved_times(name, date_start)
         if not user_date:
             print("You can't cancel reservation, because there is no reservation on specified date.")
             return
         return user_date
 
-    def _check_cancellation_conditions(self, name, date_start):
+    def _check_cancellation_conditions(self, name: str, date_start: datetime):
         if not self._check_time_range(date_start):
             return
         if not self._check_if_not_in_past(date_start):
@@ -242,7 +242,7 @@ class Validator:
         return self._check_if_can_cancel(name, date_start)
 
     @staticmethod
-    def _check_data_range(date_start, date_end, operation="printing"):
+    def _check_data_range(date_start: datetime, date_end: datetime, operation: str = "printing"):
         # date is provided in format -> DD.MM.YYYY
         if operation == "printing":
             if date_start.date() < datetime.now().date():
@@ -271,7 +271,7 @@ class Validator:
         return self._invalid_extension_format(extension)
 
     @staticmethod
-    def _invalid_extension_format(extension):
+    def _invalid_extension_format(extension: str):
         if extension.lower() not in ["csv", "json"]:
             terminal_clear()
             print(f"Invalid extension -> {extension}. Please provide a valid extension -> {{csv/json}}.")
@@ -289,7 +289,7 @@ class Validator:
         return self._invalid_filename_format(filename)
 
     @staticmethod
-    def _invalid_filename_format(filename):
+    def _invalid_filename_format(filename: str):
         # filename can contain only letters, numbers, underscores and dashes
         if re.match(r"^[a-zA-Z0-9_.-]+$", filename) is None:
             terminal_clear()

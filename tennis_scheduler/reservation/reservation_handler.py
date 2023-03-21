@@ -1,6 +1,8 @@
-from .reservation_validator import Validator
+import csv
+import json
 from datetime import timedelta, datetime
-import csv, json
+
+from .reservation_validator import Validator
 
 MAIN_DB = "tennis_scheduler.sqlite"
 
@@ -9,7 +11,7 @@ class ReservationHandler(Validator):
     def __init__(self):
         super().__init__(MAIN_DB)
 
-    def execute_option(self, option):
+    def execute_option(self, option: int) -> None:
         if option == 1:
             self.__reserve()
         elif option == 2:
@@ -19,12 +21,13 @@ class ReservationHandler(Validator):
         elif option == 4:
             self.__save_reservations()
         elif option == 5:
+            self._database.close_database()
             exit()
         else:
             self._invalid_option(option)
         return
 
-    def __reserve(self):
+    def __reserve(self) -> None:
         name = self._invalid_name()
         if name is None:
             return
@@ -66,7 +69,7 @@ class ReservationHandler(Validator):
         return
 
     @staticmethod
-    def __get_final_choice(closest_time):
+    def __get_final_choice(closest_time: datetime):
         print(f"The time you chose is unavailable, "
               f"would you like to make a reservation for {str(closest_time.time())[:-3]} instead? (yes/no)")
         choice = input()
@@ -77,7 +80,7 @@ class ReservationHandler(Validator):
         print("Invalid choice. Please choose yes or no.")
         return
 
-    def __cancel(self):
+    def __cancel(self) -> None:
         name = self._invalid_name()
         if name is None:
             return
@@ -95,7 +98,7 @@ class ReservationHandler(Validator):
         print("Reservation cancelled!")
         return
 
-    def __print_option(self):
+    def __print_option(self) -> None:
         start_date = self._invalid_date("printing_start")
         if start_date is None:
             return
@@ -113,7 +116,7 @@ class ReservationHandler(Validator):
         self.__print_schedule(start_date, end_date, reservations)
 
     @staticmethod
-    def __print_schedule(start_date, end_date, reservations):
+    def __print_schedule(start_date: datetime, end_date: datetime, reservations: list) -> None:
         days = (end_date - start_date).days + 1
 
         reservation_number = 0
@@ -139,7 +142,7 @@ class ReservationHandler(Validator):
             if reservation_number_copy == reservation_number:
                 print("No reservations")
 
-    def __save_reservations(self):
+    def __save_reservations(self) -> None:
         start_date = self._invalid_date("printing_start")
         if start_date is None:
             return
@@ -177,7 +180,7 @@ class ReservationHandler(Validator):
         print("Reservations saved!")
 
     @staticmethod
-    def __save_to_csv(filename, reservations):
+    def __save_to_csv(filename: str, reservations: list) -> None:
         with open(filename + ".csv", "w", newline="",encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(["name", "start_time", "end_time"])
@@ -185,7 +188,7 @@ class ReservationHandler(Validator):
                 writer.writerow([reservation[0], reservation[1], reservation[2]])
 
     @staticmethod
-    def __save_to_json(filename, reservations, start_date, end_date):
+    def __save_to_json(filename: str, reservations: list, start_date: datetime, end_date: datetime) -> None:
         days = (end_date - start_date).days + 1
         json_dict = {}
         reservation_number = 0
@@ -215,7 +218,7 @@ class ReservationHandler(Validator):
             json.dump(json_dict, file, indent=2)
 
     @staticmethod
-    def __save_to_json_no_empty(filename, reservations):
+    def __save_to_json_no_empty(filename: str, reservations: list) -> None:
         json_dict = {}
         for reservation in reservations:
             date = reservation[1].strftime("%d.%m")
