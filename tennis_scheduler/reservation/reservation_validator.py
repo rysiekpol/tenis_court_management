@@ -2,6 +2,7 @@ from .tools import terminal_clear
 import re
 from datetime import datetime, timedelta
 from .database.db_initializer import DatabaseInitializer
+from .database.db_initializer_orm import DatabaseInitializerORM
 
 INFORMATION = {"reservation": "When would you like to book?",
                "cancellation": "What date would you like to cancel?",
@@ -18,6 +19,7 @@ class Validator:
 
     def __init__(self, database_name):
         self._database = DatabaseInitializer(database_name)
+        #self._database = DatabaseInitializerORM(database_name)
 
     def _invalid_name(self):
         name = None
