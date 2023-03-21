@@ -18,6 +18,7 @@ class DatabaseInitializer(object):
         finally:
             if conn:
                 c = conn.cursor()
+                # by default table will have a key based on the rowid value
                 c.execute('''CREATE TABLE IF NOT EXISTS clients (name TEXT, start_time DATE, end_time DATE)''')
                 conn.close()
 

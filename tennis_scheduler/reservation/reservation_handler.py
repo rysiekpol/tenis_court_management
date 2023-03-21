@@ -110,7 +110,6 @@ class ReservationHandler(Validator):
         # reservations are sorted by start date
         # reservations = (name, start_date, end_date)*n
         reservations = self._database.get_reservations(start_date, end_date)
-
         self.__print_schedule(start_date, end_date, reservations)
 
     @staticmethod
@@ -129,7 +128,6 @@ class ReservationHandler(Validator):
             else:
                 print((start_date.date() + timedelta(days=i)).strftime("%A") + ":")
             reservation_number_copy = reservation_number
-
             while reservation_number < len(reservations) \
                     and reservations[reservation_number][1].date() == start_date.date() + timedelta(days=i):
                 print(

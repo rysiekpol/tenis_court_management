@@ -1,4 +1,6 @@
 from tennis_scheduler.reservation.reservation_validator import Validator
+from tennis_scheduler.reservation.database.db_initializer import DatabaseInitializer
+from tennis_scheduler.reservation.database.db_initializer_orm import DatabaseInitializerORM
 import unittest
 from unittest.mock import patch
 from datetime import datetime, timedelta
@@ -10,25 +12,15 @@ TEST_DB = "test_db.sqlite"
 class TestValidator(unittest.TestCase):
 
     def setUp(self) -> None:
-        conn = sqlite3.connect(TEST_DB)
-        c = conn.cursor()
-        c.execute('''CREATE TABLE IF NOT EXISTS clients (name TEXT, start_time DATE, end_time DATE)''')
-        c.execute("SELECT * FROM clients")
-        if len(c.fetchall()) == 0:
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Adam Kowalski", datetime(2050, 1, 1, 12, 0), datetime(2050, 1, 1, 13, 0)))
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Adam Kowalski", datetime(2050, 1, 2, 12, 0), datetime(2050, 1, 2, 13, 0)))
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Adam Kowalski", datetime(2049, 12, 30, 16, 0), datetime(2049, 12, 30, 16, 30)))
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Marcin Marcinowski", datetime(2050, 1, 1, 13, 0), datetime(2050, 1, 1, 14, 0)))
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Szymon Szymański", datetime(2050, 1, 1, 15, 0), datetime(2050, 1, 1, 16, 30)))
-            c.execute("INSERT INTO clients VALUES (?, ?, ?)",
-                      ("Błażej Błażejowski", datetime(2050, 1, 2, 16, 0), datetime(2050, 1, 2, 17, 0)))
-            conn.commit()
-        conn.close()
+        # create new database for each test
+        db = DatabaseInitializer(TEST_DB)
+        db.insert("Adam Kowalski", datetime(2050, 1, 1, 12, 0), datetime(2050, 1, 1, 13, 0))
+        db.insert("Adam Kowalski", datetime(2050, 1, 2, 12, 0), datetime(2050, 1, 2, 13, 0))
+        db.insert("Adam Kowalski", datetime(2049, 12, 30, 16, 0), datetime(2049, 12, 30, 16, 30))
+        db.insert("Marcin Marcinowski", datetime(2050, 1, 1, 13, 0), datetime(2050, 1, 1, 14, 0))
+        db.insert("Szymon Szymański", datetime(2050, 1, 1, 15, 0), datetime(2050, 1, 1, 16, 30))
+        db.insert("Szymon Szymański", datetime(2050, 1, 1, 8, 0), datetime(2050, 1, 1, 9, 0))
+        db.insert("Błażej Błażejowski", datetime(2050, 1, 2, 16, 0), datetime(2050, 1, 2, 17, 0))
 
         self.validator = Validator(TEST_DB)
 
