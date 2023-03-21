@@ -1,0 +1,21 @@
+{
+  "21.03": [
+    {
+      "name": "Szymon Szyma\u0144ski",
+      "start_time": "14:30",
+      "end_time": "15:30"
+    },
+    {
+      "name": "Andrzej Zapasnik",
+      "start_time": "15:30",
+      "end_time": "17:00"
+    }
+  ],
+  "22.03": [
+    {
+      "name": "John Smith",
+      "start_time": "12:00",
+      "end_time": "13:00"
+    }
+  ]
+}

@@ -88,7 +88,7 @@ class Validator:
 
     def _invalid_booking(self, date):
         booking = None
-        print("How long would you like to book court?")
+        print("For how long would you like to book court?")
         print("1) 30 Minutes")
         print("2) 60 Minutes")
         if date.hour < 17:
@@ -183,7 +183,19 @@ class Validator:
     @staticmethod
     def _get_base_available_times(date_start):
         available_times = []
-        start_time = date_start.replace(hour=date_start.hour, minute=0, second=0, microsecond=0)
+        start_hour = 8
+        start_minutes = 0
+        if date_start.date() == datetime.now().date():
+            # e.g. now is 14:35, then closest available time is 16:00
+            if datetime.now().minute > 30:
+                start_hour = (datetime.now() + timedelta(hours=2)).hour
+                start_minutes = 0
+            # e.g. now is 14:05, then closest available time is 15:30
+            else:
+                start_hour = (datetime.now() + timedelta(hours=1)).hour
+                start_minutes = 30
+
+        start_time = date_start.replace(hour=start_hour, minute=start_minutes, second=0, microsecond=0)
         end_time = date_start.replace(hour=18, minute=30, second=0, microsecond=0)
         while start_time < end_time:
             available_times.append([start_time, start_time + timedelta(minutes=30)])
@@ -298,7 +310,7 @@ class Validator:
         if choice.lower() in ["yes", "y"]:
             return True
         elif choice.lower() in ["no", "n"]:
-            return
+            return False
         terminal_clear()
         print(f"Invalid option -> {choice}. Please provide a valid option {{yes/no}}.")
         return

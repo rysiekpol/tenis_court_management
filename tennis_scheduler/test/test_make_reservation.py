@@ -1,4 +1,4 @@
-from tenis_scheduler.reservation.reservation_validator import Validator
+from tennis_scheduler.reservation.reservation_validator import Validator
 import unittest
 from unittest.mock import patch
 from datetime import datetime, timedelta
@@ -32,7 +32,7 @@ class TestValidator(unittest.TestCase):
 
         self.validator = Validator(TEST_DB)
 
-    @patch('tenis_scheduler.reservation.reservation_validator.Validator._invalid_name',
+    @patch('tennis_scheduler.reservation.reservation_validator.Validator._invalid_name',
            return_value='Marek Kowalski')
     def test_invalid_name(self, mock_input):
         self.assertEqual(self.validator._invalid_name(), "Marek Kowalski")
@@ -49,7 +49,7 @@ class TestValidator(unittest.TestCase):
         self.assertIsNone(self.validator._invalid_option(7))
         self.assertIsNone(self.validator._invalid_option("abc"))
 
-    @patch('tenis_scheduler.reservation.reservation_validator.Validator._invalid_date', return_value='01.01.2050 12:00')
+    @patch('tennis_scheduler.reservation.reservation_validator.Validator._invalid_date', return_value='01.01.2050 12:00')
     def test_invalid_date(self, mock_input):
         self.assertEqual(self.validator._invalid_date(), "01.01.2050 12:00")
 
@@ -109,18 +109,17 @@ class TestValidator(unittest.TestCase):
 
     def test_check_closest_reservation(self):
         self.assertEqual(self.validator._check_closest_reservation
-                         (datetime(2050, 1, 1, 12, 0), 60), datetime(2050, 1, 1, 14, 0))
+                         (datetime(2050, 1, 1, 12, 0), 60), datetime(2050, 1, 1, 11, 0))
         self.assertEqual(self.validator._check_closest_reservation
-                         (datetime(2050, 1, 1, 12, 0), 90), datetime(2050, 1, 1, 16, 30))
+                         (datetime(2050, 1, 1, 12, 0), 90), datetime(2050, 1, 1, 10, 30))
         self.assertEqual(self.validator._check_closest_reservation
-                         (datetime(2049, 12, 30, 16, 0), 30), datetime(2049, 12, 30, 16, 30))
-        self.assertIsNone(self.validator._check_closest_reservation(datetime(2050, 1, 2, 18, 0), 60))
+                         (datetime(2049, 12, 30, 16, 0), 30), datetime(2049, 12, 30, 15, 30))
+        self.assertEqual(self.validator._check_closest_reservation(datetime(2050, 1, 1, 14, 30), 90), datetime(2050, 1, 1, 16, 30))
         self.assertEqual(self.validator._check_closest_reservation(datetime(2050, 1, 2, 16, 30), 60),datetime(2050, 1, 2, 17, 0))
 
     def test_get_base_available_times(self):
         self.assertIsNotNone(self.validator._get_base_available_times(datetime(2050, 1, 1, 16, 0)))
         self.assertIsNotNone(self.validator._get_base_available_times(datetime(2050, 1, 2, 11, 0)))
-        self.assertListEqual(self.validator._get_base_available_times(datetime(2050, 1, 1, 19, 0)), [])
 
     def test_check_if_can_cancel(self):
         self.assertEqual(self.validator._check_if_can_cancel
