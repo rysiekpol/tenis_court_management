@@ -1,7 +1,7 @@
 
 # Tenis Scheduler 
 
-@@ author -> Maciej Szefler - ma.szefler@gmail.com
+@@ author -> Maciej Szefler - ma.szefler@gmail.com / maciek20022010@gmail.com
 
 This script was made for the backend internship task at Profil Software for managing the tennis court. You can make reservations, delete, print, and save them to a file.
 
@@ -9,32 +9,71 @@ While writing to JSON, you can choose so the script can save it with empty days 
 
 The standard path for writing files depends from your "position" in your os. 
 
-Script uses sqlite as a database.
+Script uses sqlite as a database with ORM or clean SQL (you can choose which option you like).
+
+I used SQLAlchemy for "speaking" with database in ORM.
+## Packages
+If you want to use database with ORM, you need to install sqlalchemy.
+
+On Windows:
+
+```bash
+$ cd Downloads/internship_task # most probably
+$ python -m venv venv
+$ venv\Scripts\activate
+$ pip install sqlalchemy
+
+```
+
+On macOS/Linux:
+
+```bash
+$ cd Downloads/internship_task # most probably
+$ python -m venv venv
+$ source/bin/activate
+$ pip install sqlalchemy
+```
+
+Then in ```internship_task/reservation/reservation_validator.py```  comment the line 
+```py
+self._database = DatabaseInitializer(database_name)
+# and uncomment the line
+self._database = DatabaseInitializerORM(database_name)
+```
+
+If you want to use tests while using ORM database, in ```internship_task/test/test_make_reservation.py``` change
+```
+db = DatabaseInitializer(TEST_DB)
+# to 
+db = DatabaseInitializerORM(TEST_DB)
+```
+
+If you don't want to use ORM database, then delete it, and remove lines from above. You will also need to remove importing packages from the files above.
 
 ## Usage/Examples
 
 To start a script, type in the terminal:
 
 ```bash
-cd Downloads/internship_task # most probably
-python tennis_scheduler
+$ cd Downloads/internship_task # most probably
+$ python tennis_scheduler
 
 # depending on your os distribution you may need to type in
-python3 tennis_scheduler 
+$ python3 tennis_scheduler 
 ```
 
 To run unit tests, type in:
 
 ```bash
-python -m unittest discover  
+$ python -m unittest discover  
 
 # or same as above
-python3 -m unittest discover
+$ python3 -m unittest discover
 ```
 
 Make a reservation e.g.
 
-```bash
+```
 What do you want to do? {1, 2, 3, 4, 5}
 1. Make a reservation
 2. Cancel a reservation
@@ -65,7 +104,7 @@ Press enter to continue...
 
 Cancel a reservation e.g.
 
-```bash
+```
 What do you want to do? {1, 2, 3, 4, 5}
 1. Make a reservation
 2. Cancel a reservation
@@ -87,7 +126,7 @@ Press enter to continue...
 
 Print schedule e.g.
 
-```bash
+```
 What do you want to do? {1, 2, 3, 4, 5}
 1. Make a reservation
 2. Cancel a reservation
@@ -118,7 +157,7 @@ Press enter to continue...
 
 Save schedule to file e.g.
 
-```bash
+```
 What do you want to do? {1, 2, 3, 4, 5}
 1. Make a reservation
 2. Cancel a reservation
