@@ -30,7 +30,7 @@ On macOS/Linux:
 ```bash
 $ cd Downloads/internship_task # most probably
 $ python -m venv venv
-$ source/bin/activate
+$ source venv/bin/activate
 $ pip install sqlalchemy
 ```
 
